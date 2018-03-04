@@ -200,6 +200,17 @@ function VelocityEquation(u::Array{Float64, 2}, v::Array{Float64, 2}, p::Array{F
     end
 end
 
+function plotit(rec_p, rec_u, rec_v)
+    gr()
+    step = Int(MAXSTEP/IO_FREQUENCY)
+    x = linspace(-20, 20, MX)
+    y = linspace(-10, 10, MY)
+
+    @gif for i in 1:step
+        plot(x, y, rec_p[(i-1)*MX+1:i*MX, 1:MY], st=[:contour])
+    end
+end
+
 function main()
     CFL = 0.2
 
@@ -212,12 +223,20 @@ function main()
     v = zeros(MX, MY)
     p = zeros(MX, MY)
 
+    rec_p = zeros(MX * (Int(MAXSTEP/IO_FREQUENCY)+1), MY)
+    rec_u = zeros(MX * (Int(MAXSTEP/IO_FREQUENCY)+1), MY)
+    rec_v = zeros(MX * (Int(MAXSTEP/IO_FREQUENCY)+1), MY)
+
     BoundaryConditionforP(p)
     BoundaryConditionforV(u, v)
 
-    CSV.write("logp.csv", DataFrame(p))
-    CSV.write("logu.csv", DataFrame(u))
-    CSV.write("logv.csv", DataFrame(v))
+    rec_p[1:MX, 1:MY] = p
+    rec_u[1:MX, 1:MY] = u
+    rec_v[1:MX, 1:MY] = v
+
+    #CSV.write("logp.csv", DataFrame(p))
+    #CSV.write("logu.csv", DataFrame(u))
+    #CSV.write("logv.csv", DataFrame(v))
 
     println("Created files to save csv.")
 
@@ -228,14 +247,18 @@ function main()
         BoundaryConditionforP(p)
         VelocityEquation(u, v, p, dx, dy, dt)
         BoundaryConditionforV(u, v)
-        println(i)
         if i % IO_FREQUENCY == 0
-            CSV.write("logp.csv", DataFrame(p); append=true)
-            CSV.write("logu.csv", DataFrame(u); append=true)
-            CSV.write("logv.csv", DataFrame(v); append=true)
+            #CSV.write("logp.csv", DataFrame(p); append=true)
+            #CSV.write("logu.csv", DataFrame(u); append=true)
+            #CSV.write("logv.csv", DataFrame(v); append=true)
+            record_step = Int(i / IO_FREQUENCY)
+            rec_p[record_step*MX+1:(record_step+1)*MX, 1:MY] = p
+            rec_u[record_step*MX+1:(record_step+1)*MX, 1:MY] = u
+            rec_v[record_step*MX+1:(record_step+1)*MX, 1:MY] = v
             print("Saved csv at step ", i, ".\n")
         end
     end
+    plotit(rec_p, rec_u, rec_v)
 end
 
 main()
