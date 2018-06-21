@@ -269,9 +269,9 @@ int main(){
     ofstream logu;//ファイル書き込み用
     ofstream logv;//ファイル書き込み用
     ofstream logp;//ファイル書き込み用
-	logu.open("logu.csv",ios::trunc);
-    logv.open("logv.csv",ios::trunc);
-    logp.open("logp.csv",ios::trunc);
+	logu.open("../log/logu.csv",ios::trunc);
+    logv.open("../log/logv.csv",ios::trunc);
+    logp.open("../log/logp.csv",ios::trunc);
     /*for (int i = 0;i < mx;i++){
         for (int j = 0;j < my - 1;j++){
             logu << u[i][j] << ",";
